@@ -1,0 +1,211 @@
+﻿article {
+    display: none;
+}
+
+    article:target {
+        display: block;
+    }
+
+body {
+    display: flex;
+    flex-flow: column wrap;
+}
+
+div.mainPage {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: flex-start;
+}
+
+    div.mainPage nav {
+        flex: 1 25px;
+    }
+
+        div.mainPage nav dl dt {
+            padding: 5px 5px;
+        }
+
+            div.mainPage nav dl dt:hover {
+                background: #FFE320;
+            }
+
+    div.mainPage article {
+        flex: 12;
+        align-self: center;
+        padding: 0 0 0 20px;
+    }
+
+footer {
+    border-top: 1px solid #FF7E20;
+    background: linear-gradient( 45deg, #FFE320, #FF7E20);
+    width: 100%;
+    flex: auto;
+    align-self: flex-end;
+}
+
+    footer p {
+        color: gray;
+    }
+
+header {
+    display: flex;
+    flex-flow: row;
+    justify-content: flex-start;
+    background-color: #FFBA2C;
+    border-bottom: 1px solid #FF7E20;
+}
+
+    header img {
+        flex: none;
+    }
+
+    header h1 {
+        flex: auto;
+        padding: 0 20px;
+        color: black;
+    }
+
+nav {
+    background-color: #FFBA2C;
+}
+
+a {
+    text-decoration: none;
+}
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+nav a {
+    color: #000;
+}
+
+/* TABLE STYLING*/
+table {
+    border-collapse: collapse;
+}
+
+    table th {
+        background: #FFBA2C;
+        text-align: left;
+        font-size: small;
+        font-family: sans-serif;
+        width: auto;
+    }
+
+        table th img {
+            height: 15px;
+            width: 15px;
+            content: url(../assets/200px-magnifying_glass_icon.png);
+        }
+
+        table th input {
+            height: 10px;
+            width: 60%;
+            border: none;
+            background: inherit;
+            color: black;
+            font: inherit;
+            text-align: center;
+            vertical-align: baseline;
+            visibility: collapse;
+        }
+
+        table th:hover input {
+            visibility: visible;
+        }
+
+    table tr {
+        background: #E8BA1D;
+    }
+
+        table tr td input {
+            height: 20px;
+            width: 100%;
+            border: none;
+            background: inherit;
+            color: black;
+            font: inherit;
+            font-size: small;
+            text-align: center;
+            vertical-align: baseline;
+        }
+
+        table tr td p button {
+            width: 100px;
+            display: block;
+            color: black;
+            background-color: inherit;
+            margin: 2px;
+            border: 1px solid black;
+        }
+
+        table tr:hover {
+            background: #FFE320;
+        }
+
+tr:nth-child(odd) {
+    background: #FF7E20;
+}
+
+table, th, td {
+    border: 1px solid white;
+}
+
+/*PRINT*/
+
+@media print {
+    body {
+        background: #fff;
+        color: #000;
+    }
+
+    header,
+    nav,
+    footer {
+        display: none;
+    }
+
+    table tr {
+        border-bottom-width: 2px;
+        border-bottom-style: solid;
+        border-bottom-color: black;
+        border-top-width: 2px;
+        border-top-style: solid;
+        border-top-color: black;
+    }
+
+    article table tr:last-child {
+        display: none;
+    }
+
+    article table tr th:last-child {
+        display: none;
+    }
+
+    article table tr td:last-child {
+        display: none;
+    }
+
+    article table th img {
+        display: none;
+    }
+
+    article table tr th input {
+        display: none;
+    }
+
+    article table tr td {
+        background: white;
+    }
+
+        article table tr td input {
+            text-align: left;
+        }
+
+    article table tr th {
+        color: black;
+        background: white;
+    }
+}
