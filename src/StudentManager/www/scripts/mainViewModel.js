@@ -34,25 +34,38 @@ function remoteObservableCollection(baseUrl, collectionUrl) {
     }
 
     self.update = function (item) {
+        console.log(this);
+        item  = this;
         $.ajax(self.url + "/" + ko.mapping.toJS(item).id, {
             data: ko.toJSON(item),
             type: "put",
             contentType: "application/json",
             success: function (result) {
-                console.log(result);
-                self.observableArray.remove(item);
+                console.log("Update item: ",item);
+                console.log("Update result: ",result);
             }
         });
     }
 
     self.getFromRemote = function () {
         $.getJSON(self.url, function (data) {
-            console.log(data);
-            var mapped = $.map(data, function (item) {
-                return ko.mapping.fromJS(item);
+            console.log("Received from remote: ",data);
+            var mappedArray = $.map(data, function (item) {
+                var mapped = ko.mapping.fromJS(item);
+                var keys = Object.keys(mapped);
+                keys.forEach(function(key)
+                {
+                    var subscribeFunction = mapped[key]["subscribe"];
+                    if(subscribeFunction)
+                    {                      
+                         mapped[key]["subscribe"](self.update, mapped)
+                    }
+
+                })
+                return mapped;
             });
-            self.observableArray(mapped);
-            console.log(mapped);
+            self.observableArray( mappedArray);
+            console.log( mappedArray);
         });
     }
 
