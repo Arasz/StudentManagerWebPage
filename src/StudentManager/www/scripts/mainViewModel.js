@@ -47,6 +47,29 @@ function remoteObservableCollection(baseUrl, collectionUrl) {
         });
     }
 
+    self.fetchFromUrl = function (url)
+    {
+        $.getJSON(url, function (data) {
+            console.log("Received from remote: ",data);
+            var mappedArray = $.map(data, function (item) {
+                var mapped = ko.mapping.fromJS(item);
+                var keys = Object.keys(mapped);
+                keys.forEach(function(key)
+                {
+                    var subscribeFunction = mapped[key]["subscribe"];
+                    if(subscribeFunction)
+                    {                      
+                         mapped[key]["subscribe"](self.update, mapped)
+                    }
+
+                })
+                return mapped;
+            });
+            self.observableArray( mappedArray);
+            console.log( mappedArray);
+        });
+    }
+
     self.getFromRemote = function () {
         $.getJSON(self.url, function (data) {
             console.log("Received from remote: ",data);
@@ -68,6 +91,7 @@ function remoteObservableCollection(baseUrl, collectionUrl) {
             console.log( mappedArray);
         });
     }
+    
 
     self.length = ko.computed(function () {
         return self.observableArray().length;
@@ -151,6 +175,12 @@ function mainViewModel() {
         return true;
     }
 
+    self.goToMarksForSubject = function (subject)
+    {
+        location.hash = "marks/"+subject.id();
+        return true;
+    }
+
     self.addMark = function () {
         self.remoteMarks.add(self.mark);
         
@@ -166,6 +196,11 @@ function mainViewModel() {
     self.getMarks = function () {
         self.remoteMarks.getFromRemote();
     };
+
+    self.getMarksForSubject = function(id)
+    {
+        self.remoteMarks.fetchFromUrl(baseAddress+"subjects"+"/"+id+"/marks");
+    }
 
     //Subjects
 
@@ -185,10 +220,12 @@ function mainViewModel() {
 
     //Behavior
 
-    self.goToSubjects = function (param) {
+    self.goToSubjects = function () {
         location.hash = "subjects";
         return true;
     }
+
+
 
     self.addSubject = function () {
         var data = ko.mapping.toJS(self.subject);
@@ -218,6 +255,11 @@ $(document).ready(function () {
             var name = "get" + (this.params.name[0].toUpperCase() + this.params.name.slice(1));
             console.log(name);
             self[name].call(self);
+        });
+        this.get('#marks/:id', function()
+        {
+            self.getMarksForSubject(this.params.id);
+
         });
 
         this.get('', function () { this.app.runRoute('get', '#students') });
