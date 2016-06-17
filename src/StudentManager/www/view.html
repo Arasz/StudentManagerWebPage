@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -28,7 +28,7 @@
         </nav>
 
         <article id="students">
-            <h2>List of students (<span data-bind="text: remoteStudents.length"></span>)</h2>
+            <h2>List of students <span data-bind="text: studentsAppendix"></span> (<span data-bind="text: remoteStudents.length"></span>)</h2>
             <table>
                 <tr>
                     <th>Id<input type="number" min="0" max="65535" data-bind="value: searchId" id="studentById" /> <img alt="search" /></th>
