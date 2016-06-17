@@ -8,9 +8,9 @@ function remoteObservableCollection(baseUrl, collectionUrl) {
     self.url = baseUrl + collectionUrl;
 
     self.add = function (item, url) {
-        if (url === undefined);
+        if (url === undefined) url = self.url;
         console.log(item);
-        $.ajax(self.url, {
+        $.ajax(url, {
             data: ko.mapping.toJSON(item),
             type: "post",
             contentType: "application/json",
@@ -24,11 +24,17 @@ function remoteObservableCollection(baseUrl, collectionUrl) {
         });
     }
 
-    self.remove = function (item) {
-        console.log(self.url + "/" + ko.mapping.toJS(item).id);
+    self.remove = function (item, url) {
+        console.log("Befor update in remove: ", url);
+        if (url === undefined) {
+            url = self.url;
+            url = url + "/" + ko.mapping.toJS(item).id;
+        }
+        console.log("After update in remove: ", url);
+        console.log(url);
         $.ajax(
         {
-            url: self.url + "/" + ko.mapping.toJS(item).id,
+            url: url,
             type: "delete",
             success: function (result) {
                 console.log(result);
@@ -104,11 +110,9 @@ function mainViewModel() {
     // Students
 
     //Data
-
-    self.searchId = ko.observable();
+    self.searchBirthday = ko.observable();
     self.searchName = ko.observable();
     self.searchLastName = ko.observable();
-    self.searchBirthday = ko.observable();
 
     self.remoteStudents = new remoteObservableCollection(baseAddress, "students");;
     self.students = self.remoteStudents.observableArray;
@@ -156,8 +160,9 @@ function mainViewModel() {
 
     //Data
 
-    self.searchMark = ko.observable();
+    self.searchMarkValue = ko.observable();
     self.searchDate = ko.observable();
+    self.searchStudentId = ko.observable();
 
     self.remoteMarks = new remoteObservableCollection(baseAddress, "marks");
 
@@ -170,6 +175,8 @@ function mainViewModel() {
         value: ko.observable(),
         submitTime: ko.observable(),
     }
+
+    self.subjectid = "";
 
     //Behavior
     self.goToMarks = function (param) {
@@ -190,23 +197,28 @@ function mainViewModel() {
         self.getMarksForStudent(student.id());
     }
 
-    self.addMark = function () {
-        if (self.marksForSubjectId !== "") {
-            self.remoteMarks.add(self.mark);
-            self.mark.studentId("");
-            self.mark.value("");
-            self.mark.submitTime("");
+    self.addMark = function (subject) {
+        if (self.subjectid !== "") {
+            self.remoteMarks.add(self.mark, self.baseAddress + "subjects/" + self.subjectid + "/marks");
         }
+        self.mark.studentId("");
+        self.mark.value("");
+        self.mark.submitTime("");
     }
 
     self.deleteMark = function (item) {
-        self.remoteMarks.remove(item);
+        console.log(item);
+        console.log(self.subjectid);
+        if (self.subjectid !== "") {
+            self.remoteMarks.remove(item, self.baseAddress + "subjects/" + self.subjectid + "/marks/" + item.id() + "/" + item.studentId());
+        }
     }
     self.getMarks = function () {
         self.remoteMarks.getFromRemote();
     };
 
     self.getMarksForSubject = function (id) {
+        self.subjectid = id;
         self.remoteMarks.fetchFromUrl(baseAddress + "subjects" + "/" + id + "/marks");
     }
 
@@ -252,6 +264,36 @@ function mainViewModel() {
     }
 
     self["get" + location.hash[1].toUpperCase() + location.hash.slice(2)]();
+
+    self.searchName.subscribe(function (name) {
+        self.remoteStudents.getFromRemote("/?name=" + name);
+    });
+    self.searchLastName.subscribe(function (surname) {
+        self.remoteStudents.getFromRemote("/?surname=" + surname);
+    });
+    self.searchBirthday.subscribe(function (birthday) {
+        self.remoteStudents.getFromRemote("/?afterDate=" + birthday + "&beforeDay=" + birthday);
+    });
+
+    self.searchMarkValue.subscribe(function (mark) {
+        self.remoteMarks.getFromRemote("/?value=" + mark);
+    });
+
+    self.searchDate.subscribe(function (date) {
+        self.remoteMarks.getFromRemote("/?date=" + date);
+    });
+
+    self.searchStudentId.subscribe(function (date) {
+        self.remoteMarks.getFromRemote("/?studentId=" + date);
+    });
+
+    self.searchSubject.subscribe(function (subject) {
+        self.remoteSubjects.getFromRemote("/?name=" + subject);
+    });
+
+    self.searchTeacher.subscribe(function (teacher) {
+        self.remoteSubjects.getFromRemote("/?teacher=" + teacher);
+    });
 };
 
 var viewModel = new mainViewModel();
