@@ -45,7 +45,7 @@
                         <td><input type="date" data-bind="value: birthday" required /></td>
                         <td>
                             <p>
-                                <button>See grades</button>
+                                <button data-bind="click: goToMarksForStudent">See marks</button>
                                 <button data-bind="click: deleteStudent">Delete</button>
                             </p>
                         </td>
@@ -66,7 +66,7 @@
         </article>
 
         <article id="marks">
-            <h2>List of marks  (<span data-bind="text: remoteMarks.length"></span>)</h2>
+            <h2>List of marks <span data-bind="text: marksAppendix"></span> (<span data-bind="text: remoteMarks.length"></span>)</h2>
             <table>
                 <tr>
                     <th>Student id<input type="text" data-bind="value: searchName" id="gradeByStudentName" /><img alt="search" /></th>
@@ -81,7 +81,7 @@
                         <td><input type="date" data-bind="value: submitTime" required /></td>
                         <td>
                             <p>
-                                <button>See student</button>
+                                <button data-bind="click: goToStudentWithMark">See student</button>
                                 <button data-bind="click: deleteMark">Delete</button>
                             </p>
                         </td>

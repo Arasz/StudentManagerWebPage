@@ -135,7 +135,12 @@ function mainViewModel() {
 
     self.goToStudents = function (param) {
         location.hash = "students";
-        return true;
+        self.getStudents();
+    }
+
+    self.goToStudentWithMark = function (id)
+    {
+
     }
 
     self.addStudent = function () {
@@ -163,6 +168,8 @@ function mainViewModel() {
 
     self.marks = remoteMarks.observableArray;
 
+    self.marksAppendix = ko.observable("");
+    
     self.mark = {
         studentId: ko.observable(),
         value: ko.observable(),
@@ -172,13 +179,19 @@ function mainViewModel() {
     //Behavior
     self.goToMarks = function (param) {
         location.hash = "marks";
-        return true;
+        self.getMarks();
     }
 
     self.goToMarksForSubject = function (subject)
     {
-        location.hash = "marks/"+subject.id();
-        return true;
+        location.hash = "marks";
+        self.marksAppendix("for "+subject.name());
+        self.getMarksForSubject(subject.id());
+    }
+
+    self.goToMarksForStudent = function(student)
+    {
+
     }
 
     self.addMark = function () {
@@ -222,7 +235,7 @@ function mainViewModel() {
 
     self.goToSubjects = function () {
         location.hash = "subjects";
-        return true;
+        self.getSubjects();
     }
 
 
@@ -241,6 +254,8 @@ function mainViewModel() {
     self.getSubjects = function () {
         self.remoteSubjects.getFromRemote();
     }
+
+    self["get"+location.hash[1].toUpperCase()+location.hash.slice(2)]();
 };
 
 
@@ -248,21 +263,5 @@ var viewModel = new mainViewModel();
 
 $(document).ready(function () {
     // Client-side routes
-    $.sammy(function () {
-        this.get('#:name', function () {
-            console.log(this.params.name);
-            self.chosenTableHash(this.params.name);
-            var name = "get" + (this.params.name[0].toUpperCase() + this.params.name.slice(1));
-            console.log(name);
-            self[name].call(self);
-        });
-        this.get('#marks/:id', function()
-        {
-            self.getMarksForSubject(this.params.id);
-
-        });
-
-        this.get('', function () { this.app.runRoute('get', '#students') });
-    }).run();
     ko.applyBindings(viewModel);
 });
