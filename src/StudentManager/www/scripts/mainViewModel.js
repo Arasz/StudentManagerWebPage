@@ -7,15 +7,19 @@ function remoteObservableCollection(baseUrl, collectionUrl) {
 
     self.url = baseUrl + collectionUrl;
 
-    self.add = function (item) {
+    self.add = function (item, url) {
+        if (url === undefined);
+        console.log(item);
         $.ajax(self.url, {
             data: ko.mapping.toJSON(item),
             type: "post",
             contentType: "application/json",
             success: function (result) {
                 console.log(result);
-                var newItem = ko.mapping.toJSON(item);
-                self.observableArray.push(item);
+                var newItem = ko.mapping.fromJS(result);
+                self.subscribe(newItem);
+                console.log(newItem);
+                self.observableArray.push(newItem);
             }
         });
     }
@@ -52,13 +56,7 @@ function remoteObservableCollection(baseUrl, collectionUrl) {
             console.log("Received from remote: ", data);
             var mappedArray = $.map(data, function (item) {
                 var mapped = ko.mapping.fromJS(item);
-                var keys = Object.keys(mapped);
-                keys.forEach(function (key) {
-                    var subscribeFunction = mapped[key]["subscribe"];
-                    if (subscribeFunction) {
-                        mapped[key]["subscribe"](self.update, mapped)
-                    }
-                })
+                self.subscribe(mapped);
                 return mapped;
             });
             self.observableArray(mappedArray);
@@ -72,13 +70,7 @@ function remoteObservableCollection(baseUrl, collectionUrl) {
             console.log("Received from remote: ", data);
             var mappedArray = $.map([].concat(data), function (item) {
                 var mapped = ko.mapping.fromJS(item);
-                var keys = Object.keys(mapped);
-                keys.forEach(function (key) {
-                    var subscribeFunction = mapped[key]["subscribe"];
-                    if (subscribeFunction) {
-                        mapped[key]["subscribe"](self.update, mapped);
-                    }
-                });
+                self.subscribe(mapped);
                 return mapped;
             });
             self.observableArray(mappedArray);
@@ -87,9 +79,19 @@ function remoteObservableCollection(baseUrl, collectionUrl) {
         });
     }
 
-    self.length = ko.computed(function () {
-        return self.observableArray().length;
-    });
+    self.subscribe = function (mapped) {
+        var keys = Object.keys(mapped);
+        keys.forEach(function (key) {
+            var subscribeFunction = mapped[key]["subscribe"];
+            if (subscribeFunction) {
+                mapped[key]["subscribe"](self.update, mapped);
+            }
+        });
+
+        self.length = ko.computed(function () {
+            return self.observableArray().length;
+        });
+    }
 }
 
 function mainViewModel() {
@@ -112,17 +114,9 @@ function mainViewModel() {
     self.students = self.remoteStudents.observableArray;
 
     self.student = {
-        id: ko.computed(
-           function () {
-               var underlyingArray = students();
-               var length = underlyingArray.length;
-               if (length === 0) return 0;
-               console.log(underlyingArray[length - 1].id());
-               return underlyingArray[length - 1].id() + 1;
-           }, this),
-        name: ko.observable(),
-        surname: ko.observable(),
-        birthday: ko.observable()
+        name: ko.observable(""),
+        surname: ko.observable(""),
+        birthday: ko.observable(""),
     }
 
     self.studentsAppendix = ko.observable("");
@@ -141,6 +135,9 @@ function mainViewModel() {
 
     self.addStudent = function () {
         self.remoteStudents.add(self.student);
+        self.student.name("");
+        self.student.birthday("");
+        self.student.surname("");
     }
 
     self.deleteStudent = function (item) {
@@ -194,11 +191,12 @@ function mainViewModel() {
     }
 
     self.addMark = function () {
-        self.remoteMarks.add(self.mark);
-
-        //self.mark.studentId("");
-        //self.mark.value("");
-        //self.mark.submitTime("");
+        if (self.marksForSubjectId !== "") {
+            self.remoteMarks.add(self.mark);
+            self.mark.studentId("");
+            self.mark.value("");
+            self.mark.submitTime("");
+        }
     }
 
     self.deleteMark = function (item) {
@@ -240,10 +238,9 @@ function mainViewModel() {
     }
 
     self.addSubject = function () {
-        var data = ko.mapping.toJS(self.subject);
-        self.remoteSubjects.add(data);
-        // self.subject.name("");
-        // self.subject.teacher("");
+        self.remoteSubjects.add(self.subject);
+        self.subject.name("");
+        self.subject.teacher("");
     }
 
     self.deleteSubject = function (item) {
